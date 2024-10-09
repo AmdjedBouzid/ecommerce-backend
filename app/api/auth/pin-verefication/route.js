@@ -13,6 +13,7 @@ export async function POST(req) {
   try {
     await connectDB();
     const { Code_Pink } = await req.json();
+    console.log(" { Code_Pink } ", { Code_Pink });
     const PINS = await Pin.find({});
     if (PINS.length > 1) {
       await Pin.deleteMany({});

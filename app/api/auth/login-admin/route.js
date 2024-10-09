@@ -19,6 +19,7 @@ export async function POST(req) {
 
     // Parse the request body to get the admin data
     const { username, email, password, phonenumber } = await req.json();
+    console.log("request:", { username, email, password, phonenumber });
     const validation = regester.safeParse({
       username,
       email,
