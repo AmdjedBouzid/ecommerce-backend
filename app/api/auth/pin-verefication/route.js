@@ -45,13 +45,14 @@ export async function POST(req) {
     }
 
     if (Code_Pink === PINS[0].code) {
+      await Pin.deleteMany({});
       const admin = await Admin.findOne({});
 
       if (!admin) {
         return NextResponse.json({ error: "Admin not found" }, { status: 404 });
       }
-
-      const token = jwt.sign(admin, process.env.NEXT_PUBLIC_JWT_SECRET, {
+      const adminObject = admin.toObject();
+      const token = jwt.sign(adminObject, process.env.NEXT_PUBLIC_JWT_SECRET, {
         expiresIn: "30d",
       });
 

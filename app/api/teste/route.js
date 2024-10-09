@@ -15,14 +15,14 @@ import { generateRandomPin, Send_Email } from "@/app/utils/functions";
  */
 export async function POST(req) {
   await connectDB(); // Ensure connection to MongoDB
-  const PINS = await Pin.find({}); // Fetch all PIN documents
-  console.log("first", PINS[0].code);
-  console.log("last", PINS[PINS.length - 1].code);
-  return NextResponse.json(PINS); // Return the PIN documents as JSON response
-}
+  //   const PINS = await Pin.find({}); // Fetch all PIN documents
+  //   console.log("first", PINS[0].code);
+  //   console.log("last", PINS[PINS.length - 1].code);
+  //   return NextResponse.json(PINS); // Return the PIN documents as JSON response
+  // }
 
-const PINS = await Pin.find({});
-if (PINS.length > 1 || PINS.length === 0) {
-  await Pin.deleteMany({});
-  return NextResponse.json({ message: "any code PIN sent  " }, { status: 500 });
+  // const PINS = await Pin.find({});
+  // if (PINS.length > 1 || PINS.length === 0) {
+  //   await Pin.deleteMany({});
+  //   return NextResponse.json({ message: "any code PIN sent  " }, { status: 500 });
 }
