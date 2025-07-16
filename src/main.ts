@@ -16,7 +16,7 @@ async function bootstrap() {
     methods: 'GET,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.use(cookieParser());
   await app.listen(process.env.PORT ?? 5000);
