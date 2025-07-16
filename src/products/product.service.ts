@@ -24,13 +24,7 @@ export class ProductService {
     private readonly productImageRepository: Repository<productImage>,
   ) {}
 
-  deleteProduct(productId: number) {
-    return { productId, message: 'Product deleted successfully' };
-  }
-
-  async create(
-    body: CreateProductDto,
-  ): Promise<{ Product: Product; message: string }> {
+  async create(body: CreateProductDto): Promise<Product> {
     const category = await this.categoryRepository.findOne({
       where: { id: body.categoryId },
     });
@@ -61,11 +55,13 @@ export class ProductService {
       images: body.imageUrl.map((url) => ({ url })),
     });
 
-    const savedProduct = await this.productRepository.save(product);
-    return { Product: savedProduct, message: 'product created ' };
+    return await this.productRepository.save(product);
   }
   async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { id } });
+    const product = await this.productRepository.findOne({
+      where: { id }, // Ensure we only fetch non-deleted products
+      relations: ['category', 'images'], // eager loading of related entities
+    });
 
     if (!product) {
       throw new NotFoundException(`No product with this id: ${id}`);
@@ -74,6 +70,13 @@ export class ProductService {
     return product;
   }
 
+  async find(): Promise<Product[]> {
+    const products = await this.productRepository.find({
+      relations: ['category', 'images'],
+      where: { isDeleted: false }, // Ensure we only fetch non-deleted products
+    });
+    return products;
+  }
   async findAll(): Promise<Product[]> {
     const products = await this.productRepository.find({
       relations: ['category', 'images'],
@@ -114,7 +117,7 @@ export class ProductService {
   async addImages(
     productId: number,
     imageUrls: string[],
-  ): Promise<productImage[]> {
+  ): Promise<{ id: number; url: string }[]> {
     const product = await this.productRepository.findOne({
       where: { id: productId },
     });
@@ -126,12 +129,21 @@ export class ProductService {
     const newImages = imageUrls.map((url) => {
       const image = new productImage();
       image.url = url;
-      image.product = product;
+      image.product = product; // associate with the product
       return image;
     });
 
-    return await this.productImageRepository.save(newImages);
+    if (newImages.length === 0) {
+      throw new ConflictException('No images provided to add');
+    }
+
+    // Save and return only id and url
+    return (await this.productImageRepository.save(newImages)).map((image) => ({
+      id: image.id,
+      url: image.url,
+    }));
   }
+
   async deleteImages(
     productId: number,
     imageIds?: number[],
@@ -186,6 +198,7 @@ export class ProductService {
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.images', 'images')
+      .where('product.isDeleted = :isDeleted', { isDeleted: false }) // ✅ Soft delete filter
       .skip(skip)
       .take(take);
 
@@ -208,5 +221,17 @@ export class ProductService {
       limit: take,
       message: 'Products fetched successfully',
     };
+  }
+
+  async delete(id: number): Promise<{ message: string }> {
+    const product = await this.productRepository.findOne({ where: { id } });
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    await this.productRepository.update(id, { isDeleted: true });
+
+    return { message: `Product with ID ${id} deleted successfully` };
   }
 }

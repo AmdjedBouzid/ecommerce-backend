@@ -21,7 +21,7 @@ export const dataSourceOptions: DataSourceOptions = {
     DeliveryCompany,
   ],
   migrations: ['dist/db/migrations/*.js'],
-  synchronize: true,
+  synchronize: process.env.NODE_ENV === 'production',
 };
 const AppDataSource = new DataSource(dataSourceOptions);
 export default AppDataSource;

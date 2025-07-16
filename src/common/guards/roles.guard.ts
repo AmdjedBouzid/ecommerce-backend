@@ -1,13 +1,13 @@
 import {
+  Injectable,
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import * as jwt from 'jsonwebtoken';
-import { ROLES_KEY } from '../decorators/roles.decorator'; // adjust path
-import { Role } from '../enums/role.enum'; // adjust path
+import { ROLES_KEY } from '@/src/common/decorators/roles.decorator';
+import { Role } from '@/src/common/enums/role.enum';
+import { JwtPayload } from '@/src/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -19,31 +19,17 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    if (!requiredRoles || requiredRoles.length === 0) return true;
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true; // No roles required
+    }
 
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
+    const user: JwtPayload = request.user;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new ForbiddenException('Missing or invalid token');
+    if (!user || !requiredRoles.includes(user.role as Role)) {
+      throw new ForbiddenException('You do not have permission (roles)');
     }
 
-    const token = authHeader.split(' ')[1];
-
-    try {
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET || 'your_jwt_secret',
-      );
-      request.user = decoded;
-
-      if (!requiredRoles.includes(decoded['role'])) {
-        throw new ForbiddenException('Access denied');
-      }
-
-      return true;
-    } catch (err) {
-      throw new ForbiddenException('Invalid token');
-    }
+    return true;
   }
 }

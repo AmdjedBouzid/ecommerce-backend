@@ -53,7 +53,6 @@ export class AddOrderDto {
   @IsString()
   deliveryType?: DeliveryType;
 
-  @IsOptional()
   @IsNotEmpty()
   @IsString()
   firstName: string;

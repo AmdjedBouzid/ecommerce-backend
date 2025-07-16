@@ -14,13 +14,14 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product-dto';
 
-import { AuthGuard } from '@/src/common/guards/auth.guard';
+import { JwtAuthGuard } from '@/src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/src/common/guards/roles.guard';
 import { Roles } from '@/src/common/decorators/roles.decorator';
 import { Role } from '@/src/common/enums/role.enum';
 import { AddImagesDto } from './dtos/add-image.dto';
 import { DeleteImagesDto } from './dtos/delete-image.dto';
 import { PaginationDto } from './dtos/pagination.dto';
+import { Auth } from '../common/decorators/auth.decorator';
 
 // Require authentication for all routes
 @Controller('products')
@@ -30,26 +31,21 @@ export class ProductsController {
   getProductsWithPagination(@Query() paginationDto: PaginationDto) {
     return this.productService.getProductsWithPagination(paginationDto);
   }
-  @Get()
-  findAll() {
-    return this.productService.findAll();
-  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productService.findOne(id);
   }
 
   @Post()
-  @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   create(@Body() body: CreateProductDto) {
     return this.productService.create(body);
   }
 
   @Put(':id')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  // @Roles(Role.ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateProductDto,
@@ -57,15 +53,13 @@ export class ProductsController {
     return this.productService.update(id, body);
   }
 
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   @Post('images/:id')
   addImages(@Param('id', ParseIntPipe) id: number, @Body() dto: AddImagesDto) {
-    return this.productService.addImages(+id, dto.imageUrls);
+    return this.productService.addImages(id, dto.imageUrls);
   }
 
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   @Delete('images/:id')
   deleteImages(
     @Param('id', ParseIntPipe) id: number,
@@ -74,10 +68,14 @@ export class ProductsController {
     return this.productService.deleteImages(id, dto.imageIds);
   }
   @Delete(':id')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   delete(@Param('id', ParseIntPipe) id: number) {
-    return { message: `Product with id ${id} deleted` };
+    return this.productService.delete(id);
+  }
+
+  @Get('/all')
+  @Auth(Role.ADMIN)
+  findAll() {
+    return this.productService.findAll();
   }
 }
-//@Query() paginationDto: PaginationDto

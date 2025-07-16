@@ -126,7 +126,7 @@ export class OrderService {
     return this.orderRepo.save(order);
   }
 
-  async rejectOrder(id: number, dto: RejectOrderDto): Promise<Order> {
+  async rejectOrder(id: number, dto: RejectOrderDto): Promise<Order | null> {
     const order = await this.orderRepo.findOne({
       where: { id: id },
       relations: ['items', 'items.product', 'deliveryCompany', 'items.order'],
@@ -149,7 +149,15 @@ export class OrderService {
     }
     order.rejectedAt = new Date();
     order.status = dto.status;
-    return this.orderRepo.save(order);
+    await this.orderRepo.save(order);
+    return this.orderRepo.findOne({
+      where: { id: order.id },
+      relations: [
+        'items.product.images',
+        'items.product.category',
+        'deliveryCompany',
+      ],
+    });
   }
   async getOrders(): Promise<Order[]> {
     return await this.orderRepo.find({
@@ -178,7 +186,11 @@ export class OrderService {
 
     const [data, totalQuery] = await this.orderRepo.findAndCount({
       where,
-      relations: ['items', 'deliveryCompany'],
+      relations: [
+        'items.product.images',
+        'items.product.category',
+        'deliveryCompany',
+      ],
       take: limit,
       skip: (page - 1) * limit,
       order: { createdAt: 'DESC' },

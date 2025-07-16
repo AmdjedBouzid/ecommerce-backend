@@ -10,52 +10,30 @@ import { registerDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 
-export type Payload = {
-  sub: number;
-  email: string;
-  role: string;
-};
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
   private readonly saltRounds: number;
-  private readonly jwtSecret: string;
-  private readonly jwtExpiration: string;
 
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {
-    const jwtSecret = this.configService.get<string>('JWT_SECRET');
-    const jwtExpiration =
-      this.configService.get<string>('JWT_EXPIRATION') || '7d';
     const saltRounds = this.configService.get<string>('SALT_ROUNDS');
-
-    if (!jwtSecret) {
-      throw new Error('JWT_SECRET is not defined in the environment variables');
-    }
-
     if (!saltRounds || isNaN(Number(saltRounds))) {
-      throw new Error(
-        'SALT_ROUNDS must be a valid number in environment variables',
-      );
+      throw new Error('SALT_ROUNDS must be a valid number');
     }
-
-    this.jwtSecret = jwtSecret;
-    this.jwtExpiration = jwtExpiration;
     this.saltRounds = Number(saltRounds);
   }
 
-  generateToken(payload: Payload): string {
-    return jwt.sign(payload, this.jwtSecret, {
-      expiresIn: this.jwtExpiration,
-    });
-  }
-
-  async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ accessToken: string; user: User | null }> {
     const user = await this.userRepo.findOne({
       where: { email: loginDto.email },
     });
@@ -64,15 +42,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload: Payload = {
+    const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
     };
 
-    const accessToken = this.generateToken(payload);
+    const accessToken = await this.jwtService.signAsync(payload);
 
-    return { accessToken };
+    return { accessToken, user };
   }
 
   async register(createUserDto: registerDto): Promise<{ accessToken: string }> {
@@ -96,13 +74,13 @@ export class AuthService {
 
     const savedUser = await this.userRepo.save(newUser);
 
-    const payload: Payload = {
+    const payload: JwtPayload = {
       sub: savedUser.id,
       email: savedUser.email,
       role: savedUser.role,
     };
 
-    const accessToken = this.generateToken(payload);
+    const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken };
   }

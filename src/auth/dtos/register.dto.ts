@@ -1,4 +1,5 @@
 // src/auth/dto/register.dto.ts
+import { Role } from '@/src/common/enums/role.enum';
 import {
   IsEmail,
   IsNotEmpty,
@@ -24,7 +25,7 @@ export class registerDto {
 
   @IsOptional()
   @IsEnum(['admin', 'user'], { message: 'role must be either admin or user' })
-  role?: UserRole; // Optional for security, unless only admins can assign roles
+  role?: Role;
 
   @IsOptional()
   @IsString()

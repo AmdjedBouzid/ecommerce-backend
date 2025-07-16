@@ -12,7 +12,7 @@ export class OrderItem {
   order: Order;
 
   @ManyToOne(() => Product, { eager: false })
-  product: Product; // Still relates to the full Product entity
+  product: Product;
 
   @Column('int')
   quantity: number;

@@ -17,16 +17,15 @@ import { Order } from './entities/order.entity';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
-import { AuthGuard } from '../common/guards/auth.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RejectOrderDto } from './dtos/reject-order.dto';
 import { OrderPaginationDto } from './dtos/order-pagination.dto';
+import { Auth } from '../common/decorators/auth.decorator';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
   @Get()
-  @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   getOrdersWithPagination(@Query() orderPaginationDto: OrderPaginationDto) {
     return this.orderService.getOrdersWithPagination(orderPaginationDto);
@@ -37,17 +36,13 @@ export class OrderController {
   }
 
   @Post('accept/:id')
-  @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   async acceptOrder(@Param('id', ParseIntPipe) id: number) {
     return this.orderService.acceptOrder(id);
   }
 
   @Post('reject/:id')
-  @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   async rejectOrder(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: RejectOrderDto,
@@ -55,14 +50,12 @@ export class OrderController {
     return this.orderService.rejectOrder(id, dto);
   }
   @Get()
-  @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   getOrders() {
     return this.orderService.getOrders();
   }
   @Get(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   getOrder(@Param('id', ParseIntPipe) id: number) {

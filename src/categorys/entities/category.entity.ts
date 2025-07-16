@@ -9,6 +9,9 @@ export class Category {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
+  @Column({ nullable: true })
+  image?: string;
+
   @OneToMany(() => Product, (product) => product.category, {
     onDelete: 'CASCADE',
   })

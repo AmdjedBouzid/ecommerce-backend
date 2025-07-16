@@ -4,9 +4,6 @@ import {
   IsOptional,
   Min,
   Max,
-  IsUrl,
-  IsArray,
-  ArrayNotEmpty,
   MinLength,
 } from 'class-validator';
 

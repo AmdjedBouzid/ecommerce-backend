@@ -7,6 +7,8 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { Role } from '@/src/common/enums/role.enum';
+import { Exclude } from 'class-transformer';
 export type UserRole = 'admin' | 'user';
 @Entity()
 export class User {
@@ -24,10 +26,15 @@ export class User {
   @IsString()
   @MinLength(6)
   @IsNotEmpty()
+  @Exclude()
   password: string;
 
-  @Column({ type: 'enum', enum: ['admin', 'user'], default: 'user' })
-  role: UserRole;
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: Role;
 
   @Column({ nullable: true })
   @IsOptional()
