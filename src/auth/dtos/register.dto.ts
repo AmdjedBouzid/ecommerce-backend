@@ -1,5 +1,5 @@
 // src/auth/dto/register.dto.ts
-import { Role } from '@/src/common/enums/role.enum';
+import { Role } from '../../common/enums/role.enum';
 import {
   IsEmail,
   IsNotEmpty,

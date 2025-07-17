@@ -7,8 +7,8 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Category } from '@/src/categorys/entities/category.entity';
-import { productImage } from '@/src/products/entities/productImages.entity';
+import { Category } from '../../categorys/entities/category.entity';
+import { productImage } from '../entities/productImages.entity';
 
 @Entity()
 export class Product {

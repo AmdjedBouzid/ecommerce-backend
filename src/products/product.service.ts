@@ -7,7 +7,7 @@ import { CreateProductDto } from './dtos/create-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
-import { Category } from '@/src/categorys/entities/category.entity';
+import { Category } from '../categorys/entities/category.entity';
 import { productImage } from './entities/productImages.entity'; // optional if used explicitly
 import { UpdateProductDto } from './dtos/update-product-dto';
 import { PaginationDto } from './dtos/pagination.dto';

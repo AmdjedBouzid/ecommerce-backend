@@ -14,10 +14,8 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product-dto';
 
-import { JwtAuthGuard } from '@/src/common/guards/jwt-auth.guard';
-import { RolesGuard } from '@/src/common/guards/roles.guard';
-import { Roles } from '@/src/common/decorators/roles.decorator';
-import { Role } from '@/src/common/enums/role.enum';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Role } from '../common/enums/role.enum';
 import { AddImagesDto } from './dtos/add-image.dto';
 import { DeleteImagesDto } from './dtos/delete-image.dto';
 import { PaginationDto } from './dtos/pagination.dto';

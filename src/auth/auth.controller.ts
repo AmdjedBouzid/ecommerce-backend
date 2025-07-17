@@ -5,7 +5,6 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { UsersService } from './users.service';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Auth } from '../common/decorators/auth.decorator';
 
 @Controller('auth')

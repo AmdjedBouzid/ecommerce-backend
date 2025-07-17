@@ -12,7 +12,6 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OrderStatus } from '../enums/order-status.enum';
 import { DeliveryType } from '../enums/delivery-type.enum';
 
 class OrderItemDto {
